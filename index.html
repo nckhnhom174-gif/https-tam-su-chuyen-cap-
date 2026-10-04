@@ -40,7 +40,7 @@ function stopSound(){
   soundNodes.forEach(n=>{try{n.stop?.()}catch(e){} try{n.disconnect?.()}catch(e){}})
   soundNodes=[];currentSound='';
 }
-function ensureAudio(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}
+async function ensureAudio(){if(!audioCtx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('Trình duyệt không hỗ trợ Web Audio');audioCtx=new AC()}if(audioCtx.state!=='running')await audioCtx.resume();}
 function makeNoise(){
   const buffer=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate),data=buffer.getChannelData(0);
   for(let i=0;i<data.length;i++) data[i]=Math.random()*2-1;
@@ -48,31 +48,38 @@ function makeNoise(){
 }
 function playRain(){
   const src=makeNoise(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain();
-  filter.type='lowpass';filter.frequency.value=1800;gain.gain.value=.035;
+  filter.type='lowpass';filter.frequency.value=1800;gain.gain.value=.10;
   src.connect(filter).connect(gain).connect(audioCtx.destination);src.start();soundNodes.push(src,filter,gain);
 }
 function playOcean(){
   const src=makeNoise(),filter=audioCtx.createBiquadFilter(),gain=audioCtx.createGain(),lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();
-  filter.type='lowpass';filter.frequency.value=900;gain.gain.value=.045;
+  filter.type='lowpass';filter.frequency.value=900;gain.gain.value=.12;
   lfo.frequency.value=.12;lg.gain.value=.035;lfo.connect(lg).connect(gain.gain);
   src.connect(filter).connect(gain).connect(audioCtx.destination);src.start();lfo.start();soundNodes.push(src,filter,gain,lfo,lg);
 }
 function playNature(){
-  const gain=audioCtx.createGain();gain.gain.value=.035;gain.connect(audioCtx.destination);soundNodes.push(gain);
+  const gain=audioCtx.createGain();gain.gain.value=.10;gain.connect(audioCtx.destination);soundNodes.push(gain);
   const chirp=()=>{if(currentSound!=='nature')return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(1400+Math.random()*900,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(2200+Math.random()*700,audioCtx.currentTime+.18);g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(.5,audioCtx.currentTime+.03);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.22);o.connect(g).connect(gain);o.start();o.stop(audioCtx.currentTime+.24);soundNodes.push(o,g);soundTimer=setTimeout(chirp,900+Math.random()*1800)};chirp();
 }
 function playPiano(){
-  const gain=audioCtx.createGain();gain.gain.value=.08;gain.connect(audioCtx.destination);soundNodes.push(gain);
+  const gain=audioCtx.createGain();gain.gain.value=.12;gain.connect(audioCtx.destination);soundNodes.push(gain);
   const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23];
   let i=0;const beat=()=>{if(currentSound!=='piano')return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=notes[i++%notes.length];g.gain.setValueAtTime(.001,audioCtx.currentTime);g.gain.linearRampToValueAtTime(.35,audioCtx.currentTime+.03);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.75);o.connect(g).connect(gain);o.start();o.stop(audioCtx.currentTime+.8);soundNodes.push(o,g);soundTimer=setTimeout(beat,850)};beat();
 }
 function playTone(){
-  [432,528].forEach((hz,idx)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=hz;g.gain.value=.025;o.connect(g).connect(audioCtx.destination);o.start();soundNodes.push(o,g)});
+  [432,528].forEach((hz,idx)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=hz;g.gain.value=.04;o.connect(g).connect(audioCtx.destination);o.start();soundNodes.push(o,g)});
 }
-function soundPick(name,type){
-  stopSound();ensureAudio();currentSound=type;
-  if(type==='rain')playRain();else if(type==='ocean')playOcean();else if(type==='nature')playNature();else if(type==='piano')playPiano();else playTone();
-  document.getElementById('soundResult').innerHTML='<div class="result">Đang phát <b>'+name+'</b> 🎧<br>Âm lượng vừa phải và dừng nếu thấy khó chịu. <button class="secondary" onclick="stopSound();document.getElementById(\'soundResult\').innerHTML=\'<div class=\\\'result\\\'>Đã dừng âm thanh 🌷</div>\'">⏹ Dừng âm thanh</button></div>';
+async function soundPick(name,type){
+  stopSound();currentSound=type;
+  const result=document.getElementById('soundResult');
+  result.innerHTML='<div class="result">⏳ Đang bật âm thanh…</div>';
+  try{
+    await ensureAudio();
+    if(type==='rain')playRain();else if(type==='ocean')playOcean();else if(type==='nature')playNature();else if(type==='piano')playPiano();else playTone();
+    result.innerHTML='<div class="result">Đang phát <b>'+name+'</b> 🎧<br>Âm lượng vừa phải và dừng nếu thấy khó chịu. <button class="secondary" onclick="stopSound();document.getElementById(\'soundResult\').innerHTML=\'<div class=\\\'result\\\'>Đã dừng âm thanh 🌷</div>\'">⏹ Dừng âm thanh</button></div>';
+  }catch(e){
+    result.innerHTML='<div class="result">⚠️ Trình duyệt chưa cho phép phát âm thanh. Em hãy chạm lại vào nút âm thanh một lần nữa nhé.</div>';
+  }
 }
 function connection(){document.getElementById('connectionResult').innerHTML='<div class="result">🌱 Em có thể nói: “Dạo gần đây con cảm thấy khá áp lực về việc học và chuyển cấp. Con thường xuyên lo lắng và việc ngủ của con cũng bị ảnh hưởng. Con muốn bố mẹ nghe con và cùng con tìm cách.” Em có thể sửa câu chữ theo cách nói của mình nha.</div>'}
 function connectionUnknown(){document.getElementById('connectionResult').innerHTML='<div class="result">💬 Em có thể bắt đầu rất ngắn: “Dạo này em/con không ổn lắm và muốn có người nghe một chút. Mình nói chuyện được không?” Sau đó kể thêm điều em thấy khó nhất.</div>'}
