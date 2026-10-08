@@ -10,7 +10,12 @@
 <section class="card hidden" id="checkin"><h2>📝 Check-in 10 câu</h2><div class="muted">7 ngày gần đây · Không phải bài chẩn đoán.</div><div class="progress"><div id="bar" class="bar"></div></div><div id="question"></div></section>
 <section class="card" id="stress"><h2>🌿 Mức độ căng thẳng</h2><p class="muted">Em tự đánh giá từ 0–10. 0 = rất bình tâm · 10 = căng thẳng rất nhiều.</p><input id="stressRange" class="range" type="range" min="0" max="10" value="5" oninput="document.getElementById('stressNum').textContent=this.value"><div id="stressNum" class="number">5</div><button class="primary" onclick="stressChosen()">Ghi nhận mức này</button><div id="stressResult"></div></section>
 <section class="card" id="calmSection"><h2>🫁 2 phút bình tâm</h2><p class="muted">Ngồi hoặc nằm thoải mái. Thả lỏng vai. Hít vào nhẹ nhàng… thở ra từ từ. Nếu chóng mặt hoặc khó chịu, dừng lại và thở bình thường.</p><div class="result"><div class="number" id="clock">02:00</div><p id="calm">Mình cần thoải mái trước thì công việc mới suôn sẻ đượcc 🌷</p></div><button class="primary" id="timerBtn" onclick="timerStart()">▶ Bắt đầu 2 phút</button></section>
-<section class="card"><h2>🎧 Góc âm thanh thư giãn</h2><p class="muted">Âm thanh chỉ là tùy chọn hỗ trợ thư giãn, không phải phương pháp điều trị.</p><div class="sound-grid"><button class="sound" onclick="soundPick('🌧️ Tiếng mưa nhẹ','rain')">🌧️ Mưa nhẹ</button><button class="sound" onclick="soundPick('🌊 Tiếng sóng biển','ocean')">🌊 Sóng biển</button><button class="sound" onclick="soundPick('🌿 Âm thanh thiên nhiên','nature')">🌿 Thiên nhiên</button><button class="sound" onclick="soundPick('🎹 Nhạc không lời nhẹ nhàng','piano')">🎹 Nhạc nhẹ</button><button class="sound" onclick="soundPick('🎧 432Hz/528Hz','tone')">🎧 432/528Hz</button></div><div id="soundResult"></div></section>
+<section class="card"><h2>🎧 Góc âm thanh thư giãn</h2><p class="muted">Âm thanh chỉ là tùy chọn hỗ trợ thư giãn, không phải phương pháp điều trị.</p><div class="sound-grid"><button class="sound" onclick="soundPick('🌧️ Tiếng mưa nhẹ','rain')">🌧️ Mưa nhẹ</button><button class="sound" onclick="soundPick('🌊 Tiếng sóng biển','ocean')">🌊 Sóng biển</button><button class="sound" onclick="playVietnamMusic()">🎵 Nhạc Việt theo giờ</button><button class="sound" onclick="soundPick('🎹 Nhạc không lời nhẹ nhàng','piano')">🎹 Nhạc nhẹ</button><button class="sound" onclick="soundPick('🎧 432Hz/528Hz','tone')">🎧 432/528Hz</button></div><div id="vnMusic" class="result" style="margin-top:12px">
+  <b>🎵 Nhạc Việt dành cho người trẻ</b>
+  <div id="vnMusicInfo" style="margin-top:6px">Mỗi khung giờ sẽ gợi ý một bài khác; mình cũng hạn chế phát lại bài vừa nghe.</div>
+  <div id="vnMusicButtons" class="buttons" style="margin-top:10px"></div>
+  <div id="ytPlayer" style="margin-top:12px;display:none;aspect-ratio:16/9;border-radius:18px;overflow:hidden"></div>
+</div><div id="soundResult"></div></section>
 <section class="card"><h2>🤝 Kết nối</h2><p class="muted">Nếu điều này ảnh hưởng khá nhiều đến cuộc sống hằng ngày, một người thật ở bên ngoài cuộc trò chuyện có thể hỗ trợ em nhiều hơn.</p><div class="buttons"><button class="secondary" onclick="connection()">👨‍👩‍👧 Cha mẹ/người thân</button><button class="secondary" onclick="connection()">👩‍🏫 Giáo viên em tin tưởng</button><button class="secondary" onclick="connection()">🧑‍⚕️ Tư vấn học đường</button><button class="secondary" onclick="connection()">👥 Người lớn em tin tưởng</button><button class="secondary" onclick="connectionUnknown()">💬 Em chưa biết nói thế nào</button></div><div id="connectionResult"></div></section>
 <section class="card safe"><h2>💗 Chúng mình cùng chia sẻ, tâm sự em nhéee.</h2><p style="margin:12px 0 0;font-size:18px;line-height:1.7;text-align:center;font-weight:700"><i>“Khủng hoảng không đáng sợ bằng việc phải đi qua khủng hoảng một mình. Đừng để những chông chênh tuổi chuyển cấp trở thành hành trình một mình.”</i></p></section>
 <div class="footer">“Lắng nghe điều em nghĩ – Đồng hành điều em trải qua – Kết nối khi em cần.”<br>Hỗ trợ ban đầu, không thay thế chuyên gia tâm lý hoặc chăm sóc y tế.</div></div>
@@ -26,37 +31,80 @@ function showTopics(){addBot('Em muốn mình nghe về điều gì trước?',t
 function topicOpts(){const a=['📚 Học tập – điểm số','📝 Thi chuyển cấp','🏫 Trường/lớp mới','👥 Bạn bè','👨‍👩‍👧 Gia đình','🌙 Mất ngủ – mệt mỏi','😟 Lo lắng nhưng không rõ nguyên nhân','💬 Em chỉ muốn tâm sự'];return a.map(x=>({label:x,action:()=>topic(x.replace(/^\S+\s/,''))}))}
 function topic(x){topicName=x;addUser(x);composer.classList.remove('hidden');document.getElementById('story').placeholder='Kể cho mình nghe về '+x.toLowerCase()+' nha...';addBot('Mình nghe em nè 💗 Em cứ viết tự do nha — chuyện gì xảy ra, em đang nghĩ gì, hoặc cảm giác của em lúc đó. Mình sẽ nghe trước, không phán xét và không vội bảo em phải làm gì.');document.getElementById('story').focus()}
 function addFreePrompt(){composer.classList.remove('hidden');document.getElementById('story').focus();addBot('Ừm, em cứ kể tiếp nha. Mình vẫn đang nghe em đây 🌷')}
+function pickFresh(arr,key){
+  const k='chat_last_'+key;
+  let last=Number(localStorage.getItem(k));
+  if(!Number.isInteger(last))last=-1;
+  let idx=Math.floor(Math.random()*arr.length);
+  if(arr.length>1&&idx===last)idx=(idx+1)%arr.length;
+  localStorage.setItem(k,String(idx));
+  return arr[idx];
+}
 function sendStory(){
   const el=document.getElementById('story'),s=el.value.trim();
-  if(!s){addBot('Em cứ viết một câu cũng được nha. Mình vẫn ở đây nghe em. 💗');return}
+  if(!s){addBot(pickFresh(['Em cứ viết từ từ nha, một câu cũng được. Mình vẫn đang nghe em. 💗','Không cần nghĩ câu chữ cho hay đâu, em cứ nói đúng điều mình đang nghĩ nhé. 🌷','Ừ, em cứ kể theo cách của em. Mình ở đây, không vội. 🫶'],'empty'));return}
   addUser(s);el.value='';
   if(/tự làm đau|muốn chết|không muốn sống|tự tử|tự sát|không an toàn|bị bạo lực|bị xâm hại|bị đe dọa/i.test(s)){
-    addBot('Mình rất mừng vì em đã nói điều này ra. Lúc này mình không tiếp tục check-in bình thường nữa, vì an toàn của em quan trọng nhất. Hãy tìm ngay một người lớn em tin tưởng đang ở gần và ở cạnh họ. Nếu có nguy hiểm ngay lúc này, hãy nhờ người lớn gọi dịch vụ khẩn cấp tại nơi em đang sống. Mình vẫn có thể trò chuyện, nhưng em cần một người thật ở bên để giúp em an toàn. 🤝');
-    return
+    addBot('Mình rất mừng vì em đã nói điều này ra. Lúc này mình ưu tiên sự an toàn của em trước. Hãy tìm ngay một người lớn em tin tưởng đang ở gần và ở cạnh họ. Nếu có nguy hiểm ngay lúc này, hãy nhờ người lớn gọi dịch vụ khẩn cấp tại nơi em đang sống. Mình vẫn có thể trò chuyện, nhưng em cần một người thật ở bên để giúp em an toàn. 🤝');
+    return;
   }
   const lower=s.toLowerCase();
-  let r='Mình nghe em nè 💗 Cảm giác của em có lý do của nó, và em không cần phải giải quyết tất cả ngay một lúc. Em muốn kể thêm điều gì đang làm em nặng lòng nhất không?';
+  let r='';
   if(/ngủ|mất ngủ|khó ngủ|thức đêm|không ngủ/i.test(lower)){
-    r='Mình nghe thấy chuyện giấc ngủ đang làm em mệt thêm rồi. 🌙 Mình không vội bảo em phải ngủ ngay đâu. Trước khi ngủ, điều gì thường khiến đầu em khó “tắt” nhất?';
+    r=pickFresh([
+      'Nghe như giấc ngủ đang làm em mệt thêm rồi. 🌙 Mình không bắt em phải “ngủ ngay” đâu. Trước lúc nằm xuống, điều gì thường cứ chạy đi chạy lại trong đầu em?',
+      'Ừm, mất ngủ kéo dài dễ khiến ngày hôm sau nặng nề hơn thật. 🫶 Em thường khó ngủ vì nghĩ về chuyện học, chuyện gia đình, hay một chuyện nào đó khác?',
+      'Mình nghe em. 🌙 Có khi cơ thể rất mệt mà đầu óc vẫn chưa chịu nghỉ. Nếu em muốn, kể mình nghe khoảnh khắc khó ngủ nhất của em tối nay nhé.'
+    ],'sleep');
   }else if(/điểm|thi|học|bài tập|deadline|áp lực|sợ điểm|học không vào/i.test(lower)){
-    r='Nghe như chuyện học đang lấy khá nhiều năng lượng của em. 📚 Mình không muốn nói “cố lên” cho xong đâu. Điều làm em áp lực nhất lúc này là điểm số, kỳ thi, bài tập hay kỳ vọng của người khác?';
+    r=pickFresh([
+      'Nghe như chuyện học đang lấy khá nhiều năng lượng của em. 📚 Mình không muốn đáp “cố lên” cho xong đâu. Điều đang đè em nhất là điểm số, kỳ thi, bài tập hay kỳ vọng của người khác?',
+      'Mình hiểu cảm giác nhìn một đống bài mà trong đầu chỉ muốn bỏ chạy. 🌿 Mình tách nhỏ nó cùng em nhé: việc nào đang khiến em áp lực nhất lúc này?',
+      'Không phải lúc nào học không vào cũng có nghĩa là em kém đâu. 🫶 Có thể em đang quá mệt hoặc quá nhiều thứ phải lo. Hôm nay chuyện gì làm em thấy quá tải nhất?'
+    ],'study');
   }else if(/bạn|cô đơn|hòa nhập|bắt nạt|không ai chơi|bị bỏ rơi/i.test(lower)){
-    r='Mình nghe em. 👥 Cảm giác không thuộc về một nhóm hoặc thấy mình bị bỏ lại có thể buồn lắm. Em muốn kể xem chuyện với các bạn đã xảy ra như thế nào không?';
+    r=pickFresh([
+      'Mình nghe em. 👥 Cảm giác đứng giữa rất nhiều người mà vẫn thấy một mình thật sự khó chịu. Em muốn kể chuyện với các bạn bắt đầu từ đâu không?',
+      'Ừ, chuyện bạn bè đôi khi đau hơn mình tưởng. 🌷 Em không cần phải chứng minh mình ổn ở đây. Điều gì khiến em buồn nhất trong chuyện này?',
+      'Mình ở đây nghe em nhé. 🫶 Em đang thấy cô đơn vì chưa tìm được người hợp, vì có chuyện xảy ra với bạn, hay vì cảm giác mình bị bỏ lại?'
+    ],'friends');
   }else if(/gia đình|bố mẹ|ba mẹ|cha mẹ|người thân|kỳ vọng/i.test(lower)){
-    r='Ừm, chuyện gia đình đôi khi khó nói hơn cả chuyện học. 🫶 Em không cần phải bảo vệ cảm xúc của người khác ở đây. Điều em mong bố mẹ/người thân hiểu nhất về mình lúc này là gì?';
+    r=pickFresh([
+      'Chuyện gia đình thường khó nói vì mình vừa buồn vừa sợ làm người thân buồn. 🫶 Điều em mong bố mẹ/người thân hiểu nhất về em lúc này là gì?',
+      'Mình không đứng về phía ai để phán xét đâu, mình đứng về phía việc lắng nghe em. 🌷 Chuyện gì trong gia đình đang khiến em nặng lòng nhất?',
+      'Ừm, có những điều rất khó mở lời với người nhà. Em cứ kể ở đây trước, mình cùng tìm cách nói sao cho nhẹ hơn nếu em muốn.'
+    ],'family');
   }else if(/trường mới|lớp mới|chuyển cấp|cấp 2|cấp 3|vào lớp|trường/i.test(lower)){
-    r='Chuyển cấp có rất nhiều thay đổi cùng lúc nên chông chênh là điều mình có thể gặp phải. 🏫 Em đang lo nhất về môi trường mới, thầy cô, bạn bè hay việc học?';
-  }else if(/buồn|khóc|mệt|chán|không ổn|tệ|stress|lo|sợ|hoang mang/i.test(lower)){
-    r='Mình ở đây với em nè 🌷 Em không cần phải diễn là “ổn” đâu. Nếu muốn, em có thể nói cho mình biết chuyện gì vừa xảy ra trước khi em có cảm giác này.';
+    r=pickFresh([
+      'Chuyển cấp có quá nhiều thứ mới cùng lúc nên chông chênh là chuyện rất dễ xảy ra. 🏫 Em đang lo nhất về bạn bè, thầy cô, môi trường mới hay việc học?',
+      'Mình hiểu cảm giác đứng trước một nơi mới mà chưa biết mình sẽ thuộc về đâu. 🌷 Điều em tưởng tượng về trường mới làm em lo nhất là gì?',
+      'Không cần phải thích nghi hoàn hảo ngay đâu. 🫶 Em muốn kể cho mình nghe điều gì về việc chuyển cấp đang khiến em nghĩ nhiều nhất?'
+    ],'transition');
+  }else if(/buồn|khóc|mệt|chán|không ổn|tệ|stress|lo|sợ|hoang mang|thất vọng/i.test(lower)){
+    r=pickFresh([
+      'Mình ở đây với em nè 🌷 Em không cần diễn là “ổn” đâu. Chuyện gì vừa xảy ra trước khi em bắt đầu có cảm giác này?',
+      'Ừ, mình nghe em. Có vẻ hôm nay mọi thứ hơi quá sức với em rồi. 🫶 Em muốn mình chỉ lắng nghe trước hay cùng em tìm một cách nhẹ hơn?',
+      'Em không cần giải quyết hết mọi thứ ngay lúc này. 💗 Kể mình nghe phần làm em đau đầu nhất trước nhé.'
+    ],'sad');
   }else if(/vui|hạnh phúc|ổn|tốt|thích/i.test(lower)){
-    r='Nghe em nói vậy mình cũng thấy vui lây đó 🥰 Em muốn kể điều gì hôm nay làm em thấy ổn hoặc vui hơn không?';
+    r=pickFresh([
+      'Nghe em nói vậy mình cũng vui lây đó 🥰 Điều gì hôm nay làm em thấy nhẹ lòng hoặc vui nhất?',
+      'Aaa vậy là hôm nay có một chút ánh sáng rồi nè 🌷 Em muốn kể mình nghe khoảnh khắc em thích nhất không?',
+      'Tuyệt quá 💗 Mình thích nghe cả những chuyện vui của em nữa. Hôm nay có chuyện gì đáng nhớ không?'
+    ],'happy');
+  }else{
+    r=pickFresh([
+      'Mình nghe em nè 💗 Điều em vừa kể có vẻ quan trọng với em. Nếu chọn một phần để kể thêm, em muốn bắt đầu từ đâu?',
+      'Ừm, mình đang theo câu chuyện của em. 🌷 Không cần phải kể thật rõ ngay đâu. Điều gì đang chiếm nhiều suy nghĩ của em nhất?',
+      'Mình chưa muốn vội đưa lời khuyên. 🫶 Mình muốn hiểu em trước: lúc chuyện đó xảy ra, điều em cảm thấy rõ nhất là gì?'
+    ],'general');
   }
   addBot(r,[
     {label:'💬 Kể thêm',action:()=>document.getElementById('story').focus()},
-    {label:'🌿 Tìm một việc nhỏ',action:()=>addBot('Mình có thể cùng em chọn một việc rất nhỏ cho hôm nay, ví dụ nghỉ 10 phút, viết ra điều đang lo, hoặc nhắn cho một người em tin tưởng. Em muốn chọn cách nào?')},
+    {label:'🌿 Tìm một việc nhỏ',action:()=>addBot(pickFresh(['Mình cùng chọn một việc thật nhỏ thôi nhé: nghỉ 10 phút, uống nước, viết ra điều đang lo, hoặc nhắn cho một người em tin. Em thấy việc nào dễ nhất?','Không cần thay đổi cả ngày đâu. Chọn một việc nhỏ em có thể làm trong 5–10 phút, mình làm cùng nhau nhé. 🌱'],'small'))},
     {label:'🫁 Thư giãn 2 phút',action:()=>go('calmSection')},
     {label:'📝 Check-in',action:()=>showCheckin()}
-  ])
+  ]);
 }
 const qs=['Em mệt mỏi lắm ròi đúng khongg (Một ý chí mạnh mẽ cũng sẽ có lúc yếu đuối makk)','Em có cảm thấy căng thẳng, stress khongg?','Em có cảm thấy overthinking từ đó khiến khó ngủ, mất ngủ khong?','Sáng ngủ dậy, em có thấy mình chán nản, thiếu năng lượng, không muốn làm gì?','Khi căng thẳng, việc ăn uống của em có bị ảnh hưởng không?','Em có cảm thấy buồn hoặc giảm hứng thú với những điều mình thường thích không?','Em có cảm thấy không muốn đến trường hoặc lo sợ về trường/lớp mới không?','Em có cảm thấy cô đơn hoặc khó hòa nhập với bạn bè không?','Em có cảm thấy áp lực vì kỳ vọng của cha mẹ hoặc thầy cô không?','Em có cảm thấy việc học và các vấn đề hiện tại vượt quá khả năng ứng phó của mình không?'];let qi=0,answers=[];
 function showCheckin(){document.getElementById('checkin').classList.remove('hidden');go('checkin');qi=0;answers=[];renderQ()}
@@ -112,9 +160,59 @@ async function soundPick(name,type){
     result.innerHTML='<div class="result">⚠️ Trình duyệt chưa cho phép phát âm thanh. Em hãy chạm lại vào nút âm thanh một lần nữa nhé.</div>';
   }
 }
+const vnSongs=[
+  {title:'Trễ Giờ Cơm',artist:'Quang Hùng MasterD, WEAN, Sơn.K, Xuân Định K.Y',id:'S0klW2Rgkgo'},
+  {title:'Thêu Hoa Dệt Gấm',artist:'buitruonglinh, HURRYKNG, JSOL, CONGB',id:'VeCy5mfAdg8'},
+  {title:'Em Tôi',artist:'Thanh Duy, Thỏ (Da LAB), Hoàng Tôn, Đinh Mạnh Ninh, Cheng, 14 Casper',id:'RKd3P1R2G0Q'},
+  {title:'Đừng Làm Trái Tim Anh Đau',artist:'Sơn Tùng M-TP',id:'abPmZCZZrFA'}
+];
+function musicHistory(){try{return JSON.parse(localStorage.getItem('vn_music_history')||'[]')}catch(e){return[]}}
+function chooseHourlySong(){
+  const h=new Date().getHours(),history=musicHistory();
+  const start=h%vnSongs.length;
+  for(let step=0;step<vnSongs.length;step++){
+    const s=vnSongs[(start+step)%vnSongs.length];
+    if(!history.includes(s.id))return s;
+  }
+  localStorage.setItem('vn_music_history',JSON.stringify([]));
+  return vnSongs[start];
+}
+function rememberSong(id){
+  let history=musicHistory().filter(x=>x!==id);
+  history.push(id);
+  if(history.length>3)history=history.slice(-3);
+  localStorage.setItem('vn_music_history',JSON.stringify(history));
+}
+function renderMusicButtons(){
+  const box=document.getElementById('vnMusicButtons');if(!box)return;
+  box.innerHTML='';
+  vnSongs.forEach(s=>{
+    const b=document.createElement('button');b.className='secondary';b.textContent='🎵 '+s.title;
+    b.onclick=()=>playVNTrack(s);box.appendChild(b);
+  });
+}
+function playVNTrack(song){
+  rememberSong(song.id);
+  const p=document.getElementById('ytPlayer');
+  p.style.display='block';
+  p.innerHTML='<iframe width="100%" height="100%" src="https://www.youtube.com/embed/'+song.id+'?autoplay=1&rel=0" title="'+song.title+'" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  document.getElementById('vnMusicInfo').innerHTML='🎶 Đang phát <b>'+song.title+'</b> — '+song.artist+'<br><small>Nhạc được lấy từ video YouTube chính thức/nguồn phát hành tương ứng.</small>';
+}
+function playVietnamMusic(){
+  renderMusicButtons();
+  const song=chooseHourlySong();
+  playVNTrack(song);
+}
+function initVNMusic(){
+  renderMusicButtons();
+  const h=new Date().getHours();
+  const song=vnSongs[h%vnSongs.length];
+  document.getElementById('vnMusicInfo').innerHTML='🕒 Khung giờ hiện tại gợi ý: <b>'+song.title+'</b> — '+song.artist+'. Bấm “Nhạc Việt theo giờ” để nghe.';
+}
 function connection(){document.getElementById('connectionResult').innerHTML='<div class="result">🌱 Em có thể nói: “Dạo gần đây con cảm thấy khá áp lực về việc học và chuyển cấp. Con thường xuyên lo lắng và việc ngủ của con cũng bị ảnh hưởng. Con muốn bố mẹ nghe con và cùng con tìm cách.” Em có thể sửa câu chữ theo cách nói của mình nha.</div>'}
 function connectionUnknown(){document.getElementById('connectionResult').innerHTML='<div class="result">💬 Em có thể bắt đầu rất ngắn: “Dạo này em/con không ổn lắm và muốn có người nghe một chút. Mình nói chuyện được không?” Sau đó kể thêm điều em thấy khó nhất.</div>'}
 let timer=null,left=120;function timerStart(){if(timer)return;document.getElementById('timerBtn').disabled=true;timer=setInterval(()=>{left--;document.getElementById('clock').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');if(left<=0){clearInterval(timer);timer=null;document.getElementById('calm').textContent='Xong rồi 🌷 Em vừa dành 2 phút để chăm sóc mình. Bây giờ em tự đánh giá mức căng thẳng lại từ 0–10 nhé.';document.getElementById('timerBtn').textContent='✓ Hoàn thành'}},1000)}
+initVNMusic();
 // Chatbot chỉ mở khi em bấm 'Bắt đầu tâm sự' hoặc chọn tiếp tục trò chuyện.
 
 </script></body></html>
