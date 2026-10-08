@@ -26,7 +26,38 @@ function showTopics(){addBot('Em muốn mình nghe về điều gì trước?',t
 function topicOpts(){const a=['📚 Học tập – điểm số','📝 Thi chuyển cấp','🏫 Trường/lớp mới','👥 Bạn bè','👨‍👩‍👧 Gia đình','🌙 Mất ngủ – mệt mỏi','😟 Lo lắng nhưng không rõ nguyên nhân','💬 Em chỉ muốn tâm sự'];return a.map(x=>({label:x,action:()=>topic(x.replace(/^\S+\s/,''))}))}
 function topic(x){topicName=x;addUser(x);composer.classList.remove('hidden');document.getElementById('story').placeholder='Kể cho mình nghe về '+x.toLowerCase()+' nha...';addBot('Mình nghe em nè 💗 Em cứ viết tự do nha — chuyện gì xảy ra, em đang nghĩ gì, hoặc cảm giác của em lúc đó. Mình sẽ nghe trước, không phán xét và không vội bảo em phải làm gì.');document.getElementById('story').focus()}
 function addFreePrompt(){composer.classList.remove('hidden');document.getElementById('story').focus();addBot('Ừm, em cứ kể tiếp nha. Mình vẫn đang nghe em đây 🌷')}
-function sendStory(){const el=document.getElementById('story'),s=el.value.trim();if(!s){addBot('Em cứ viết một câu cũng được nha. Mình vẫn ở đây nghe em. 💗');return}addUser(s);el.value='';if(/tự làm đau|muốn chết|không muốn sống|tự tử|tự sát|không an toàn|bị bạo lực|bị xâm hại|bị đe dọa/i.test(s)){addBot('Mình rất mừng vì em đã nói điều này ra. Lúc này mình không tiếp tục check-in bình thường nữa, vì an toàn của em quan trọng nhất. Hãy tìm ngay một người lớn em tin tưởng đang ở gần và ở cạnh họ. Nếu có nguy hiểm ngay lúc này, hãy nhờ người lớn gọi dịch vụ khẩn cấp tại nơi em đang sống. Mình vẫn có thể trò chuyện, nhưng em cần một người thật ở bên để giúp em an toàn. 🤝');return}let r='Chúng mình hiểu bạn ròi, bạn mạnh mẽ quá, ngưỡng mộ luôn á. Nhớ là không phải một hôm mình buồn mà cả trang sách bị đóng lại nhé. Tất cả những may mắn nhất, thành công nhất thường sẽ đến sau khoảnh khắc mà em đã dũng cảm không buông tay. 🌷\n\nMình muốn nghe thêm một chút: điều gì trong chuyện này làm em nặng lòng nhất?';if(/ngủ|mất ngủ|khó ngủ/i.test(s))r='Mình nghe thấy chuyện giấc ngủ đang làm em mệt thêm rồi. 🌙 Em muốn kể xem trước khi ngủ điều gì thường chạy trong đầu mình không?';else if(/điểm|thi|học|bài tập|deadline|áp lực/i.test(s))r='Nghe như chuyện học đang lấy khá nhiều năng lượng của em. 📚 Mình không nói “có gì đâu” đâu. Điều làm em áp lực nhất là điểm số, kỳ thi, bài tập hay kỳ vọng của người khác?';else if(/bạn|cô đơn|hòa nhập|bắt nạt/i.test(s))r='Mình nghe em. 👥 Chuyện khó hòa nhập hoặc thấy mình đứng ngoài có thể nặng lòng lắm. Em muốn kể thêm chuyện với các bạn đã xảy ra như thế nào không?';addBot(r,[{label:'💬 Kể thêm',action:()=>document.getElementById('story').focus()},{label:'🌿 Tìm một việc nhỏ',action:()=>addBot('Mình có thể cùng em chọn một việc rất nhỏ cho hôm nay, ví dụ nghỉ 10 phút, viết ra điều đang lo, hoặc nhắn cho một người em tin tưởng. Em muốn chọn cách nào?')},{label:'🫁 Thư giãn 2 phút',action:()=>go('calmSection')},{label:'📝 Check-in',action:()=>showCheckin()}])}
+function sendStory(){
+  const el=document.getElementById('story'),s=el.value.trim();
+  if(!s){addBot('Em cứ viết một câu cũng được nha. Mình vẫn ở đây nghe em. 💗');return}
+  addUser(s);el.value='';
+  if(/tự làm đau|muốn chết|không muốn sống|tự tử|tự sát|không an toàn|bị bạo lực|bị xâm hại|bị đe dọa/i.test(s)){
+    addBot('Mình rất mừng vì em đã nói điều này ra. Lúc này mình không tiếp tục check-in bình thường nữa, vì an toàn của em quan trọng nhất. Hãy tìm ngay một người lớn em tin tưởng đang ở gần và ở cạnh họ. Nếu có nguy hiểm ngay lúc này, hãy nhờ người lớn gọi dịch vụ khẩn cấp tại nơi em đang sống. Mình vẫn có thể trò chuyện, nhưng em cần một người thật ở bên để giúp em an toàn. 🤝');
+    return
+  }
+  const lower=s.toLowerCase();
+  let r='Mình nghe em nè 💗 Cảm giác của em có lý do của nó, và em không cần phải giải quyết tất cả ngay một lúc. Em muốn kể thêm điều gì đang làm em nặng lòng nhất không?';
+  if(/ngủ|mất ngủ|khó ngủ|thức đêm|không ngủ/i.test(lower)){
+    r='Mình nghe thấy chuyện giấc ngủ đang làm em mệt thêm rồi. 🌙 Mình không vội bảo em phải ngủ ngay đâu. Trước khi ngủ, điều gì thường khiến đầu em khó “tắt” nhất?';
+  }else if(/điểm|thi|học|bài tập|deadline|áp lực|sợ điểm|học không vào/i.test(lower)){
+    r='Nghe như chuyện học đang lấy khá nhiều năng lượng của em. 📚 Mình không muốn nói “cố lên” cho xong đâu. Điều làm em áp lực nhất lúc này là điểm số, kỳ thi, bài tập hay kỳ vọng của người khác?';
+  }else if(/bạn|cô đơn|hòa nhập|bắt nạt|không ai chơi|bị bỏ rơi/i.test(lower)){
+    r='Mình nghe em. 👥 Cảm giác không thuộc về một nhóm hoặc thấy mình bị bỏ lại có thể buồn lắm. Em muốn kể xem chuyện với các bạn đã xảy ra như thế nào không?';
+  }else if(/gia đình|bố mẹ|ba mẹ|cha mẹ|người thân|kỳ vọng/i.test(lower)){
+    r='Ừm, chuyện gia đình đôi khi khó nói hơn cả chuyện học. 🫶 Em không cần phải bảo vệ cảm xúc của người khác ở đây. Điều em mong bố mẹ/người thân hiểu nhất về mình lúc này là gì?';
+  }else if(/trường mới|lớp mới|chuyển cấp|cấp 2|cấp 3|vào lớp|trường/i.test(lower)){
+    r='Chuyển cấp có rất nhiều thay đổi cùng lúc nên chông chênh là điều mình có thể gặp phải. 🏫 Em đang lo nhất về môi trường mới, thầy cô, bạn bè hay việc học?';
+  }else if(/buồn|khóc|mệt|chán|không ổn|tệ|stress|lo|sợ|hoang mang/i.test(lower)){
+    r='Mình ở đây với em nè 🌷 Em không cần phải diễn là “ổn” đâu. Nếu muốn, em có thể nói cho mình biết chuyện gì vừa xảy ra trước khi em có cảm giác này.';
+  }else if(/vui|hạnh phúc|ổn|tốt|thích/i.test(lower)){
+    r='Nghe em nói vậy mình cũng thấy vui lây đó 🥰 Em muốn kể điều gì hôm nay làm em thấy ổn hoặc vui hơn không?';
+  }
+  addBot(r,[
+    {label:'💬 Kể thêm',action:()=>document.getElementById('story').focus()},
+    {label:'🌿 Tìm một việc nhỏ',action:()=>addBot('Mình có thể cùng em chọn một việc rất nhỏ cho hôm nay, ví dụ nghỉ 10 phút, viết ra điều đang lo, hoặc nhắn cho một người em tin tưởng. Em muốn chọn cách nào?')},
+    {label:'🫁 Thư giãn 2 phút',action:()=>go('calmSection')},
+    {label:'📝 Check-in',action:()=>showCheckin()}
+  ])
+}
 const qs=['Em mệt mỏi lắm ròi đúng khongg (Một ý chí mạnh mẽ cũng sẽ có lúc yếu đuối makk)','Em có cảm thấy căng thẳng, stress khongg?','Em có cảm thấy overthinking từ đó khiến khó ngủ, mất ngủ khong?','Sáng ngủ dậy, em có thấy mình chán nản, thiếu năng lượng, không muốn làm gì?','Khi căng thẳng, việc ăn uống của em có bị ảnh hưởng không?','Em có cảm thấy buồn hoặc giảm hứng thú với những điều mình thường thích không?','Em có cảm thấy không muốn đến trường hoặc lo sợ về trường/lớp mới không?','Em có cảm thấy cô đơn hoặc khó hòa nhập với bạn bè không?','Em có cảm thấy áp lực vì kỳ vọng của cha mẹ hoặc thầy cô không?','Em có cảm thấy việc học và các vấn đề hiện tại vượt quá khả năng ứng phó của mình không?'];let qi=0,answers=[];
 function showCheckin(){document.getElementById('checkin').classList.remove('hidden');go('checkin');qi=0;answers=[];renderQ()}
 function renderQ(){document.getElementById('bar').style.width=(qi/10*100)+'%';document.getElementById('question').innerHTML='<div class="q">'+(qi+1)+'. '+qs[qi]+'</div><div class="answers">'+['0 – Không có','1 – Đôi khi','2 – Thường xuyên','3 – Gần như mỗi ngày'].map((x,n)=>'<button class="answer" onclick="answerQ('+n+')">'+x+'</button>').join('')+'</div>'}
